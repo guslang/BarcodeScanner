@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "162675963835",
+    "project_id": "qr-scan-be108",
+    "storage_bucket": "qr-scan-be108.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:162675963835:android:fa975c500eeb59cdc2369e",
+        "android_client_info": {
+          "package_name": "com.guslang.barcodescanner"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "162675963835-rtu8g2apprcd82o84699cjmiguua6hut.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCR1kRbShs3kSiZopd_l224P8CwMm_5m88"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "162675963835-rtu8g2apprcd82o84699cjmiguua6hut.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
