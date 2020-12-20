@@ -2,20 +2,25 @@ package com.guslang.barcodescanner
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import com.google.android.gms.ads.*
+import com.google.android.material.navigation.NavigationView
 import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.main.*
+import kotlinx.android.synthetic.main.main_toolbar.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
@@ -26,7 +31,7 @@ import org.jsoup.Jsoup
 import org.jsoup.select.Elements
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     val TAG: String =  "로그"
     val errMsg : String = "유통물류 DB에 등록되지 않은 코드입니다."
@@ -37,7 +42,20 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.main)
+        //메인 툴바 변경
+        setSupportActionBar(main_layout_toolbar)
+        // 드로어를 꺼낼 홈 버튼 활성화
+//        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        // 홈버튼 이미지 변경
+//        supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_menu)
+        // 툴바에 타이틀 안보이게
+//        supportActionBar?.setDisplayShowTitleEnabled(false)
+
+
+        main_navigationView.setNavigationItemSelectedListener(this) //navigation 리스너
+
+
 
         //firebase-admob 초기화
         //MobileAds.initialize(this,getString(R.string.admob_app_id))
@@ -78,38 +96,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
         //
-        // 앱 공유하기
-        imageView_share.setOnClickListener {
-            Log.d(TAG, "MainActivity - onCreate() share sns called")
 
-            val Sharing_intent = Intent(Intent.ACTION_SEND)
-            Sharing_intent.type = "text/plain"
-
-            val Test_Message = "https://play.google.com/store/apps/details?id=$packageName"
-
-            Sharing_intent.putExtra(Intent.EXTRA_TEXT, Test_Message)
-
-            val Sharing = Intent.createChooser(Sharing_intent, "공유하기")
-            startActivity(Sharing)
-        }
-        // 별점 주기 이동
-        imageView_rate.setOnClickListener {
-            Log.d(TAG, "MainActivity - onCreate() rating called")
-            val uri: Uri = Uri.parse("market://details?id=$packageName")
-            val goToMarket = Intent(Intent.ACTION_VIEW, uri)
-            // To count with Play market backstack, After pressing back button,
-            // to taken back to our application, we need to add following flags to intent.
-            goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY or
-                    Intent.FLAG_ACTIVITY_NEW_DOCUMENT or
-                    Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
-            try {
-                startActivity(goToMarket)
-            } catch (e: ActivityNotFoundException) {
-                startActivity(Intent(Intent.ACTION_VIEW,
-                    Uri.parse("http://play.google.com/store/apps/details?id=$packageName")))
-            }
-        }
     }
+
+
 
     // 광고 로딩
     private fun loadInterstitialAd(){
@@ -378,6 +368,93 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 //        startBarcodeReaderCustom()
+    }
+
+    
+    // 액션바 아이콘 클릭 이벤트 처리
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            android.R.id.home -> { // 메뉴 버튼
+                main_drawer_layout.openDrawer(GravityCompat.START)    // 네비게이션 드로어 열기
+            }
+            R.id.share_all -> {
+                shareApp()
+//                Toast.makeText(this, "share_all clicked", Toast.LENGTH_SHORT).show()
+            }
+            R.id.put_review -> {
+                putStar()
+//                Toast.makeText(this, "put_review clicked", Toast.LENGTH_SHORT).show()
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.share_all -> {
+                shareApp()
+                Toast.makeText(this, "share_all clicked", Toast.LENGTH_SHORT).show()
+            }
+            R.id.put_review -> {
+                putStar()
+                Toast.makeText(this, "put_review clicked", Toast.LENGTH_SHORT).show()
+            }
+        }
+        return false
+    }
+
+    override fun onBackPressed() {
+        if(main_drawer_layout.isDrawerOpen(GravityCompat.START)){
+            main_drawer_layout.closeDrawers()
+            // 테스트를 위해 뒤로가기 버튼시 Toast 메시지
+            Toast.makeText(this, "back btn clicked", Toast.LENGTH_SHORT).show()
+        } else{
+            super.onBackPressed()
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_drawer_navigation, menu)
+        return true
+    }
+
+    // 앱 공유하기
+    private fun shareApp(){
+        Log.d(TAG, "MainActivity - onCreate() share sns called")
+
+        val Sharing_intent = Intent(Intent.ACTION_SEND)
+        Sharing_intent.type = "text/plain"
+
+        val Test_Message = "https://play.google.com/store/apps/details?id=$packageName"
+
+        Sharing_intent.putExtra(Intent.EXTRA_TEXT, Test_Message)
+
+        val Sharing = Intent.createChooser(Sharing_intent, "공유하기")
+        startActivity(Sharing)
+    }
+
+    // 별점 주기 이동
+    private fun putStar(){
+        Log.d(TAG, "MainActivity - onCreate() rating called")
+        val uri: Uri = Uri.parse("market://details?id=$packageName")
+        val goToMarket = Intent(Intent.ACTION_VIEW, uri)
+        // To count with Play market backstack, After pressing back button,
+        // to taken back to our application, we need to add following flags to intent.
+        goToMarket.addFlags(
+            Intent.FLAG_ACTIVITY_NO_HISTORY or
+                    Intent.FLAG_ACTIVITY_NEW_DOCUMENT or
+                    Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+        )
+        try {
+            startActivity(goToMarket)
+        } catch (e: ActivityNotFoundException) {
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("http://play.google.com/store/apps/details?id=$packageName")
+                )
+            )
+        }
     }
 
 
